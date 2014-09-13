@@ -8,3 +8,4 @@ sonar-project.properties
 .jacocoverage/*
 lib/jfreechart-src/*
 javadocs/*	
+/dist/
