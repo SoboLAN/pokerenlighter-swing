@@ -7,7 +7,6 @@ import com.sun.java.swing.plaf.motif.MotifLookAndFeel;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
-import org.javafling.pokerenlighter.simulation.SystemUtils;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
