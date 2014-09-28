@@ -130,6 +130,7 @@ public class MenuBar
                 conn = InternetConnectionFactory.createDirectConnection(url);
             } catch (IOException ex) {
                 GUIUtilities.showErrorDialog(parent, "There was an error while checking for update", "Update Check");
+                return null;
             }
             
             String content = conn.getContent();
@@ -137,11 +138,11 @@ public class MenuBar
             if (content == null || content.equals("ERROR")) {
                 GUIUtilities.showErrorDialog(parent, "There was an error while checking for update", "Update Check");
             } else if (content.startsWith("YES")) {
-                String[] elements = content.split ("\\|");
+                String[] elements = content.split("\\|");
             
-                GUIUtilities.showOKDialog (parent, "An update is available: " + elements[1], "Update Check");
+                GUIUtilities.showOKDialog(parent, "An update is available: " + elements[1], "Update Check");
             } else if (content.startsWith("NO")) {
-                GUIUtilities.showOKDialog (parent, "You have the latest version", "Update Check");
+                GUIUtilities.showOKDialog(parent, "You have the latest version", "Update Check");
             }
             
             return null;

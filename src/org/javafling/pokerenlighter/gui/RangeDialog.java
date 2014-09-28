@@ -21,7 +21,7 @@ import org.javafling.pokerenlighter.simulation.Range;
 
 /**
  *
- * @author Murzea Radu
+ * @author Radu Murzea
  */
 public class RangeDialog extends JDialog
 {

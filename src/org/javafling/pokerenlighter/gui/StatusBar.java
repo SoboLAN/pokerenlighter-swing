@@ -11,8 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- *
- * taken from Swing Hacks: Tips and Tools for Killer GUIs
+ * Taken from Swing Hacks: Tips and Tools for Killer GUIs
  */
 public class StatusBar extends JPanel
 {

@@ -181,7 +181,7 @@ public final class GUI implements SimulationNotifiable
             omahaHiLoCommunityCards[i] = null;
         }
         
-        playersCount.setValue (Integer.valueOf(2));
+        playersCount.setValue(2);
         adjustAvailablePlayerIDs();
         
         variationBox.setSelectedIndex(0);
@@ -1089,7 +1089,7 @@ public final class GUI implements SimulationNotifiable
         playerIDBox.removeAllItems();
         
         for (int i = 1; i <= getCurrentPlayerCount(); i++) {
-            playerIDBox.addItem(new Integer(i));
+            playerIDBox.addItem(i);
         }
     }
     
@@ -1099,9 +1099,9 @@ public final class GUI implements SimulationNotifiable
         if (playersCount == null) {
             return 2;
         } else {
-            Integer c =(Integer) playersCount.getValue();
+            Integer c = (Integer) playersCount.getValue();
         
-            return c.intValue();
+            return c;
         }
     }
 

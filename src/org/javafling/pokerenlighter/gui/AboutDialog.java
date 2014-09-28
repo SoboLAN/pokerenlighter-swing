@@ -8,7 +8,7 @@ import org.javafling.pokerenlighter.main.PokerEnlighter;
 
 /**
  *
- * @author Murzea Radu
+ * @author Radu Murzea
  */
 public class AboutDialog extends JDialog
 {

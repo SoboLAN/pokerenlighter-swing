@@ -28,7 +28,7 @@ public class LinkLabel extends JLabel
         this.URL = URL;
         
         if (isBrowsingSupported()) {
-            setText(linkIfy ());
+            setText(linkIfy());
             setCursor(new Cursor(Cursor.HAND_CURSOR));
             addMouseListener(new LinkMouseListener());
         }
