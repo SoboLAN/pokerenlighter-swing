@@ -570,7 +570,7 @@ public final class GUI implements SimulationNotifiable
                 _instance
             );
             
-            simulator.setUpdateInterval(10);
+            simulator.setUpdateInterval(20);
             
             try {
                 setPlayers();
