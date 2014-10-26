@@ -67,22 +67,14 @@ public class AboutDialog extends JDialog
     
     private JPanel createInformationPanel()
     {
-        JPanel panel = new JPanel(new GridLayout(4, 2));
+        JPanel panel = new JPanel(new GridLayout(3, 2));
         
         panel.add(new JLabel("Version:"));
         
         JTextField versionField = new JTextField(PokerEnlighter.FULL_VERSION);
         versionField.setEditable(false);
         panel.add(versionField);
-        
-        panel.add(new JLabel("Minimum JVM version:"));
-        
-        JTextField minimumField = new JTextField(
-            "Java " + PokerEnlighter.MAJOR_VERSION + " Update " + PokerEnlighter.MINOR_VERSION
-        );
-        minimumField.setEditable(false);
-        panel.add(minimumField);
-        
+                
         panel.add(new JLabel("Developed using: "));
         
         JTextField compilerField = new JTextField(PokerEnlighter.COMPILED_WITH);

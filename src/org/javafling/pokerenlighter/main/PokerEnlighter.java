@@ -44,17 +44,7 @@ import org.pushingpixels.substance.api.skin.SubstanceTwilightLookAndFeel;
  * @version 1.0
  */
 public final class PokerEnlighter implements Runnable
-{
-    /**
-     * Specifies the minimum major version needed to run this program.
-     */
-    public static final int MAJOR_VERSION = 7;
-    
-    /**
-     * Specifies the minimum minor version needed to run this program.
-     */
-    public static final int MINOR_VERSION = 4;
-    
+{    
     /**
      * Represents the full version string of this current release.
      */
@@ -91,24 +81,6 @@ public final class PokerEnlighter implements Runnable
      */
     public static void main(String[] args)
     {
-        //check if the minimum version is ok
-        if (! SystemUtils.checkVersion(MAJOR_VERSION, MINOR_VERSION)) {
-            final String title = "Poker Enlighter Minimum Version Error";
-            
-            final StringBuilder message = new StringBuilder();
-            message.append("JVM version detected: ");
-            message.append(System.getProperty ("java.version"));
-            message.append(". Minimum version required: ");
-            message.append(MAJOR_VERSION);
-            message.append(" Update ");
-            message.append(MINOR_VERSION);
-            message.append(".");
-        
-            GUIUtilities.showErrorDialog(null, message.toString(), title);
-
-            return;
-        }
-        
         options = OptionsContainer.getOptionsContainer();
         
         //get the language
