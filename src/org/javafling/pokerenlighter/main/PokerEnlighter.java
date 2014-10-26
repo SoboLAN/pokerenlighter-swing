@@ -15,26 +15,6 @@ import org.javafling.pokerenlighter.gui.GUIUtilities;
 import org.javafling.pokerenlighter.gui.Language;
 import org.javafling.pokerenlighter.gui.OptionsContainer;
 import org.javafling.pokerenlighter.gui.PEDictionary;
-import org.pushingpixels.substance.api.skin.SubstanceBusinessBlackSteelLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceBusinessBlueSteelLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceBusinessLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceChallengerDeepLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceCremeCoffeeLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceCremeLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceDustCoffeeLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceDustLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceEmeraldDuskLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceMagellanLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceMistAquaLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceMistSilverLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceModerateLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceNebulaBrickWallLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceNebulaLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceOfficeBlue2007LookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceOfficeSilver2007LookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceRavenLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceSaharaLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceTwilightLookAndFeel;
 
 /**
  * Main entry point of Poker Enlighter. Contains all relevant information about the program.
@@ -144,26 +124,6 @@ public final class PokerEnlighter implements Runnable
             case "NimROD": lnfObject = new NimRODLookAndFeel(); break;
             case "EaSynth": lnfObject = new EaSynthLookAndFeel(); break;
             case "SeaGlass": lnfObject = new SeaGlassLookAndFeel(); break;
-            case "Substance-Business": lnfObject = new SubstanceBusinessLookAndFeel(); break;
-            case "Substance-BusinessBlack": lnfObject = new SubstanceBusinessBlackSteelLookAndFeel(); break;
-            case "Substance-BusinessBlue": lnfObject = new SubstanceBusinessBlueSteelLookAndFeel(); break;
-            case "Substance-Challenger": lnfObject = new SubstanceChallengerDeepLookAndFeel(); break;
-            case "Substance-Creme": lnfObject = new SubstanceCremeLookAndFeel(); break;
-            case "Substance-CremeCoffee": lnfObject = new SubstanceCremeCoffeeLookAndFeel(); break;
-            case "Substance-Dust": lnfObject = new SubstanceDustLookAndFeel(); break;
-            case "Substance-DustCoffee": lnfObject = new SubstanceDustCoffeeLookAndFeel(); break;
-            case "Substance-Emerald": lnfObject = new SubstanceEmeraldDuskLookAndFeel(); break;
-            case "Substance-Magellan": lnfObject = new SubstanceMagellanLookAndFeel(); break;
-            case "Substance-MistAqua": lnfObject = new SubstanceMistAquaLookAndFeel(); break;
-            case "Substance-MistSilver": lnfObject = new SubstanceMistSilverLookAndFeel(); break;
-            case "Substance-Moderate": lnfObject = new SubstanceModerateLookAndFeel(); break;
-            case "Substance-Nebula": lnfObject = new SubstanceNebulaLookAndFeel(); break;
-            case "Substance-NebulaBrick": lnfObject = new SubstanceNebulaBrickWallLookAndFeel(); break;
-            case "Substance-OfficeBlue": lnfObject = new SubstanceOfficeBlue2007LookAndFeel(); break;
-            case "Substance-OfficeSilver": lnfObject = new SubstanceOfficeSilver2007LookAndFeel(); break;
-            case "Substance-Raven": lnfObject = new SubstanceRavenLookAndFeel(); break;
-            case "Substance-Sahara": lnfObject = new SubstanceSaharaLookAndFeel(); break;
-            case "Substance-Twilight": lnfObject = new SubstanceTwilightLookAndFeel(); break;
             default: throw new IllegalArgumentException("invalid look-and-feel");
         }
         

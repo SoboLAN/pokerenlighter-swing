@@ -24,19 +24,17 @@ set manifestfile=Manifest.txt
 set guijar=Poker_Enlighter.jar
 set mainclass=org/javafling/pokerenlighter/main/PokerEnlighter
 set simulatorjar=lib/simulator/simulator.jar
-set lib1=lib/substance.lnf/substance.jar
-set lib2=lib/substance.lnf/trident.jar
-set lib3=lib/easynth.lnf/EaSynthLookAndFeel.jar
-set lib4=lib/jfreechart/jcommon-1.0.22.jar
-set lib5=lib/jfreechart/jfreechart-1.0.18.jar
-set lib6=lib/nimrod.lnf/nimrodlf-1.2.jar
-set lib7=lib/seaglass.lnf/seaglasslookandfeel-0.2.jar
+set lib1=lib/easynth.lnf/EaSynthLookAndFeel.jar
+set lib2=lib/jfreechart/jcommon-1.0.22.jar
+set lib3=lib/jfreechart/jfreechart-1.0.18.jar
+set lib4=lib/nimrod.lnf/nimrodlf-1.2.jar
+set lib5=lib/seaglass.lnf/seaglasslookandfeel-0.2.jar
 
 REM The actual compilation command. It is compiled without any debugging
 REM symbols, to add some obfuscation. These symbols will probably be removed by Proguard anyway, but
 REM it's not a bad thing to be extra-careful.
 
-javac -g:none -Xlint:unchecked -classpath .;%simulatorjar%;%lib1%;%lib2%;%lib3%;%lib4%;%lib5%;%lib6%;%lib7% %mainclass%.java > %buildlog% 2>&1
+javac -g:none -Xlint:unchecked -classpath .;%simulatorjar%;%lib1%;%lib2%;%lib3%;%lib4%;%lib5% %mainclass%.java > %buildlog% 2>&1
 timeout /t 1 /nobreak > NUL
 
 REM Next, the script will move inside the "org/" folder and delete all the source code files.
@@ -51,7 +49,7 @@ cd..
 REM Next, the Manifest file is built. This is needed for the JAR file.
 
 echo Main-Class: %mainclass% > %manifestfile%
-echo Class-Path: %simulatorjar% %lib1% %lib2% %lib3% %lib4% %lib5% %lib6% %lib7% >> %manifestfile%
+echo Class-Path: %simulatorjar% %lib1% %lib2% %lib3% %lib4% %lib5% >> %manifestfile%
 
 REM Package everything in a JAR file.
 

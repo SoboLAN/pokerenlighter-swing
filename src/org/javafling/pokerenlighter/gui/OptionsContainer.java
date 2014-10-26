@@ -27,27 +27,7 @@ public class OptionsContainer
         "Motif",
         "EaSynth",
         "NimROD",
-        "SeaGlass",
-        "Substance-Business",
-        "Substance-BusinessBlack",
-        "Substance-BusinessBlue",
-        "Substance-Challenger",
-        "Substance-Creme",
-        "Substance-CremeCoffee",
-        "Substance-Dust",
-        "Substance-DustCoffee",
-        "Substance-Emerald",
-        "Substance-Magellan",
-        "Substance-MistAqua",
-        "Substance-MistSilver",
-        "Substance-Moderate",
-        "Substance-Nebula",
-        "Substance-NebulaBrick",
-        "Substance-OfficeBlue",
-        "Substance-OfficeSilver",
-        "Substance-Raven",
-        "Substance-Sahara",
-        "Substance-Twilight"
+        "SeaGlass"
     };
     
     //default values
@@ -432,8 +412,8 @@ public class OptionsContainer
         
         boolean lnfFound = false;
         
-        for (int i = 0; i < availableLNFs.length; i++) {
-            if (lnf.equals(availableLNFs[i])) {
+        for (String availableLNF : availableLNFs) {
+            if (lnf.equals(availableLNF)) {
                 lnfFound = true;
                 break;
             }
