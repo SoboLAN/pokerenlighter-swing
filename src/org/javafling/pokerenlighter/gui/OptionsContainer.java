@@ -20,7 +20,6 @@ public class OptionsContainer
     private HashMap<String, String> options;
     
     //available values
-    private String[] availableLanguages = {"English", "Romanian"};
     private String[] availableLNFs = {
         "Nimbus",
         "System",
@@ -31,7 +30,6 @@ public class OptionsContainer
     };
     
     //default values
-    private String defLanguage = availableLanguages[0];
     private String defLNF = availableLNFs[0];
     private int defRounds = 105000;
     private boolean defShowLabels = true;
@@ -47,7 +45,6 @@ public class OptionsContainer
     //map keys
     //stored here separately because they're used throughout the class
     //minimizes risk of mistyping
-    private String languageKey = "language";
     private String lnfKey = "lookandfeel";
     private String roundsKey = "rounds";
     private String showLabelsKey = "graphshowlabels";
@@ -78,12 +75,7 @@ public class OptionsContainer
 
         loadConfiguration();
     }
-    
-    public String getLanguage()
-    {
-        return options.get(languageKey);
-    }
-    
+        
     public String getLookAndFeel()
     {
         return options.get(lnfKey);
@@ -163,12 +155,7 @@ public class OptionsContainer
         
         return Integer.parseInt(tiesBlue);
     }
-    
-    public String[] getAvailableLanguages()
-    {
-        return availableLanguages;
-    }
-    
+        
     public String[] getAvailableLookAndFeels()
     {
         return availableLNFs;
@@ -187,16 +174,7 @@ public class OptionsContainer
         
         return Boolean.parseBoolean(graph3D);
     }
-    
-    public void setLanguage(int newIndex)
-    {
-        if (newIndex < 0 || newIndex >= availableLanguages.length) {
-            return;
-        }
         
-        options.put(languageKey, availableLanguages[newIndex]);
-    }
-    
     public void setLookAndFeel(int newIndex)
     {
         if (newIndex < 0 || newIndex >= availableLNFs.length) {
@@ -324,7 +302,6 @@ public class OptionsContainer
             return;
         }
         
-        boolean languageOK = isValidLanguage(prop.getProperty(languageKey));
         boolean lnfOK = isValidLNF(prop.getProperty(lnfKey));
         boolean roundsOK = isValidNumericValue(prop.getProperty(roundsKey), minRounds, maxRounds);
         boolean showLabelsOK = isValidBoolean(prop.getProperty(showLabelsKey));
@@ -340,7 +317,6 @@ public class OptionsContainer
         boolean graphStackOK = isValidBoolean(prop.getProperty(graphStackedKey));
         boolean graph3DOK = isValidBoolean(prop.getProperty(graph3DKey));
         
-        options.put(languageKey, languageOK ? prop.getProperty(languageKey) : defLanguage);
         options.put(lnfKey, lnfOK ? prop.getProperty(lnfKey) : defLNF);
         options.put(roundsKey, roundsOK ? prop.getProperty(roundsKey) : Integer.toString(defRounds));
         options.put(showLabelsKey, showLabelsOK ? prop.getProperty(showLabelsKey) : Boolean.toString(defShowLabels));
@@ -356,8 +332,7 @@ public class OptionsContainer
         options.put(graphStackedKey, graphStackOK ? prop.getProperty(graphStackedKey) : Boolean.toString(defStackedGraph));
         options.put(graph3DKey, graph3DOK ? prop.getProperty(graph3DKey) : Boolean.toString(def3DGraph));
         
-        boolean everythingOK = languageOK &&
-                                lnfOK &&
+        boolean everythingOK = lnfOK &&
                                 roundsOK &&
                                 showLabelsOK &&
                                 winsRedOK &&
@@ -376,25 +351,7 @@ public class OptionsContainer
             saveConfiguration();
         }
     }
-    
-    private boolean isValidLanguage(String language)
-    {
-        if (language == null) {
-            return false;
-        }
         
-        boolean languageFound = false;
-        
-        for (int i = 0; i < availableLanguages.length; i++) {
-            if (language.equals(availableLanguages[i])) {
-                languageFound = true;
-                break;
-            }
-        }
-
-        return languageFound;
-    }
-    
     private boolean isValidBoolean(String value)
     {
         if (value == null) {
@@ -443,7 +400,6 @@ public class OptionsContainer
     {
         Properties prop = new Properties();
         
-        prop.setProperty(languageKey, options.get(languageKey));
         prop.setProperty(lnfKey, options.get(lnfKey));
         prop.setProperty(roundsKey, options.get(roundsKey));
         prop.setProperty(showLabelsKey, options.get(showLabelsKey));
@@ -472,7 +428,6 @@ public class OptionsContainer
     
     private void setDefaultValues()
     {
-        options.put(languageKey, defLanguage);
         options.put(lnfKey, defLNF);
         options.put(roundsKey, Integer.toString(defRounds));
         options.put(showLabelsKey, Boolean.toString(defShowLabels));

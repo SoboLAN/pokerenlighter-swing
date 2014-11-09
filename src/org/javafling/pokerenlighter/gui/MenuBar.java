@@ -20,25 +20,18 @@ import org.javafling.pokerenlighter.main.PokerEnlighter;
 public class MenuBar
 {
     private JFrame parent;
-    
     private JMenuBar menuBar;
-    
     private JMenu fileMenu, helpMenu;
-    
     private JMenuItem exitAction, aboutAction, prefsAction, updateAction, newSimulationAction;
     
-    private PEDictionary dictionary;
-    
-    public MenuBar(JFrame parent, PEDictionary dictionary)
+    public MenuBar(JFrame parent)
     {
         this.parent = parent;
         
-        this.dictionary = dictionary;
-        
         menuBar = new JMenuBar();
 
-        fileMenu = new JMenu(dictionary.getValue("menubar.file"));
-        helpMenu = new JMenu(dictionary.getValue("menubar.help"));
+        fileMenu = new JMenu("File");
+        helpMenu = new JMenu("Help");
         
         fileMenu.setMnemonic(KeyEvent.VK_F);
         helpMenu.setMnemonic(KeyEvent.VK_H);
@@ -46,11 +39,11 @@ public class MenuBar
         menuBar.add(fileMenu);
         menuBar.add(helpMenu);
 
-        exitAction = new JMenuItem(dictionary.getValue("menubar.file.exit"));
-        prefsAction = new JMenuItem(dictionary.getValue("menubar.file.prefs"));
-        aboutAction = new JMenuItem(dictionary.getValue("menubar.help.about"));
-        updateAction = new JMenuItem(dictionary.getValue("menubar.help.checkupdate"));
-        newSimulationAction = new JMenuItem(dictionary.getValue("menubar.file.newsim"));
+        exitAction = new JMenuItem("Exit");
+        prefsAction = new JMenuItem("Preferences");
+        aboutAction = new JMenuItem("About");
+        updateAction = new JMenuItem("Check for Update");
+        newSimulationAction = new JMenuItem("New Simulation");
 
         //fyi: order is important (user interface standards)
         fileMenu.add(newSimulationAction);
@@ -87,7 +80,7 @@ public class MenuBar
         @Override
         public void actionPerformed(ActionEvent e)
         {
-            new PreferencesDialog(parent, dictionary).display();
+            new PreferencesDialog(parent).display();
         }
     }
     

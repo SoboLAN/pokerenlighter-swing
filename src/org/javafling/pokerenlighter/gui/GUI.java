@@ -62,8 +62,6 @@ public final class GUI implements SimulationNotifiable
     private String windowTitle = "Poker Enlighter";
     private String blankCardPath = "images/blank.card.gif";
     
-    private PEDictionary dictionary;
-    
     private JFrame mainframe;
 
     private JPanel customPanel;
@@ -90,24 +88,17 @@ public final class GUI implements SimulationNotifiable
     
     private Simulator simulator;
 
-    public static GUI getGUI(PEDictionary lang)
+    public static GUI getGUI()
     {
         if (_instance == null) {
-            _instance = new GUI(lang);
+            _instance = new GUI();
         }
 
         return _instance;
     }
-    
-    public static GUI getGUI()
-    {
-        return _instance;
-    }
-    
-    private GUI(PEDictionary language)
-    {
-        dictionary = language;
         
+    private GUI()
+    {
         holdemProfiles = new PlayerProfile[MAX_PLAYERS];
         omahaProfiles = new PlayerProfile[MAX_PLAYERS];
         omahaHiLoProfiles = new PlayerProfile[MAX_PLAYERS];
@@ -122,14 +113,14 @@ public final class GUI implements SimulationNotifiable
             Toolkit.getDefaultToolkit().getImage(getClass().getResource("images/ace_spades_icon.jpg"))
         );
         
-        MenuBar menuBar = new MenuBar(mainframe, dictionary);
+        MenuBar menuBar = new MenuBar(mainframe);
         mainframe.setJMenuBar(menuBar.getMenuBar());
         mainframe.setLayout(new BorderLayout());
         
         customPanel = createCustomPanel();
         mainframe.add(customPanel, BorderLayout.CENTER);
         
-        statusBar = new StatusBar(dictionary.getValue("statusbar.ready"));
+        statusBar = new StatusBar("Ready");
         mainframe.add(statusBar, BorderLayout.SOUTH);
         
         newSimulation();
@@ -200,7 +191,7 @@ public final class GUI implements SimulationNotifiable
         
         progressBar.setValue(0);
         
-        statusBar.setText(dictionary.getValue("statusbar.ready"));
+        statusBar.setText("Ready");
     }
     
     private JPanel createCustomPanel()
@@ -233,11 +224,11 @@ public final class GUI implements SimulationNotifiable
     {
         JPanel panel = new JPanel(new BorderLayout());
         
-        GUIUtilities.setBorder(panel, dictionary.getValue("title.handoptions"), TitledBorder.LEFT);
+        GUIUtilities.setBorder(panel, "Hand Options", TitledBorder.LEFT);
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         
-        topPanel.add (new JLabel(dictionary.getValue("label.handoptions.player")));
+        topPanel.add (new JLabel("Player:"));
         
         Integer[] IDs = new Integer[MAX_PLAYERS];
         for (int i = 0; i < IDs.length; i++) {
@@ -247,20 +238,16 @@ public final class GUI implements SimulationNotifiable
         playerIDBox.setEditable(false);
         topPanel.add(playerIDBox);
         
-        topPanel.add(new JLabel(dictionary.getValue("label.handoptions.handtype")));
+        topPanel.add(new JLabel("Hand Type:"));
         
-        String[] handBoxOptions = {
-            dictionary.getValue("combobox.handoptions.random"),
-            dictionary.getValue("combobox.handoptions.range"),
-            dictionary.getValue("combobox.handoptions.exactcards")
-        };
+        String[] handBoxOptions = {"Random", "Range", "Exact Cards"};
 
         handTypeBox = new JComboBox<>(handBoxOptions);
         handTypeBox.setEditable(false);
         handTypeBox.addItemListener(new HandTypeItemListener());
         topPanel.add(handTypeBox);
         
-        selectButton = new JButton(dictionary.getValue("button.handoptions.chooserange"));
+        selectButton = new JButton("Choose Range");
         topPanel.add(selectButton);
         selectButton.addActionListener(new SelectButtonListener());
         
@@ -276,11 +263,7 @@ public final class GUI implements SimulationNotifiable
     {
         JPanel panel = new JPanel(new BorderLayout());
     
-        String[] titles = {
-            dictionary.getValue("table.handoptions.player"),
-            dictionary.getValue("table.handoptions.handtype"),
-            dictionary.getValue("table.handoptions.selection")
-        };
+        String[] titles = {"Player", "Hand Type", "Selection"};
         
         Object[][] rows = new String[MAX_PLAYERS][3];
         for (int i = 0; i < getCurrentPlayerCount(); i++) {
@@ -324,7 +307,7 @@ public final class GUI implements SimulationNotifiable
     {
         JPanel panel = new JPanel(new GridLayout(1, 2));
         
-        GUIUtilities.setBorder(panel, dictionary.getValue("title.prefs.general"), TitledBorder.LEFT);
+        GUIUtilities.setBorder(panel, "General Options", TitledBorder.LEFT);
         
         JPanel nrPlayersPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     
@@ -333,7 +316,7 @@ public final class GUI implements SimulationNotifiable
         ((JSpinner.DefaultEditor) playersCount.getEditor()).getTextField().setEditable(false);
         playersCount.addChangeListener(new PlayerCountSpinnerListener());
 
-        nrPlayersPanel.add(new JLabel(dictionary.getValue("label.general.nrplayers")));
+        nrPlayersPanel.add(new JLabel("Number of Players:"));
         nrPlayersPanel.add(playersCount);
         
         JPanel variationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -341,7 +324,7 @@ public final class GUI implements SimulationNotifiable
         variationBox = new JComboBox<>(new String[]{"Texas Hold'em", "Omaha", "Omaha Hi/Lo"});
         variationBox.addItemListener(new PokerTypeListener());
         variationBox.setEditable(false);
-        variationPanel.add(new JLabel(dictionary.getValue("label.general.pokertype")));
+        variationPanel.add(new JLabel("Poker Type:"));
         variationPanel.add(variationBox);
         
         panel.add(nrPlayersPanel);
@@ -354,9 +337,9 @@ public final class GUI implements SimulationNotifiable
     {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        GUIUtilities.setBorder(panel, dictionary.getValue("title.communitycards"), TitledBorder.LEFT);
+        GUIUtilities.setBorder(panel, "Community Cards", TitledBorder.LEFT);
         
-        enableFlop = new JCheckBox(dictionary.getValue("label.community.flop"));
+        enableFlop = new JCheckBox("Flop:");
         
         flopCard1 = new JLabel();
         flopCard2 = new JLabel();
@@ -367,14 +350,14 @@ public final class GUI implements SimulationNotifiable
         panel.add(flopCard2);
         panel.add(flopCard3);
     
-        enableTurn = new JCheckBox(dictionary.getValue("label.community.turn"));
+        enableTurn = new JCheckBox("Turn:");
         
         turnCard = new JLabel();
         
         panel.add(enableTurn);
         panel.add(turnCard);
 
-        enableRiver = new JCheckBox(dictionary.getValue("label.community.river"));
+        enableRiver = new JCheckBox("River:");
         
         riverCard = new JLabel();
         
@@ -394,12 +377,12 @@ public final class GUI implements SimulationNotifiable
     {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
 
-        GUIUtilities.setBorder(panel, dictionary.getValue("title.controls"), TitledBorder.LEFT);
+        GUIUtilities.setBorder(panel, "Controls", TitledBorder.LEFT);
                 
-        startButton = new JButton(dictionary.getValue("button.controls.start"));
+        startButton = new JButton("Start");
         startButton.addActionListener(new StartSimulationListener());
         
-        stopButton = new JButton(dictionary.getValue("button.controls.stop"));
+        stopButton = new JButton("Stop");
         stopButton.addActionListener(new StopSimulationListener());
 
         progressBar = new JProgressBar(0, 100);
@@ -408,7 +391,7 @@ public final class GUI implements SimulationNotifiable
 
         panel.add(startButton);
         panel.add(stopButton);
-        panel.add(new JLabel(dictionary.getValue("label.controls.progress")));
+        panel.add(new JLabel("Progress:"));
         panel.add(progressBar);
         
         return panel;
@@ -418,14 +401,9 @@ public final class GUI implements SimulationNotifiable
     {
         JPanel panel = new JPanel(new BorderLayout());
         
-        GUIUtilities.setBorder(panel, dictionary.getValue("title.results"), TitledBorder.CENTER);
+        GUIUtilities.setBorder(panel, "Results", TitledBorder.CENTER);
         
-        String[] titles = {
-            dictionary.getValue("table.results.player"),
-            dictionary.getValue("table.results.wins"),
-            dictionary.getValue("table.results.loses"),
-            dictionary.getValue("table.results.ties")
-        };
+        String[] titles = {"Player", "Wins", "Loses", "Ties"};
         
         Object[][] rows = new String[MAX_PLAYERS][4];
         
@@ -462,7 +440,7 @@ public final class GUI implements SimulationNotifiable
         
         exportButton = new JButton("Export to XML");
         exportButton.addActionListener(new ResultXMLListener());
-        viewGraphButton = new JButton(dictionary.getValue("button.results.graph"));
+        viewGraphButton = new JButton("View Graph");
         viewGraphButton.addActionListener(new ViewGraphListener());
         
         buttonsPanel.add(viewGraphButton);
@@ -495,7 +473,7 @@ public final class GUI implements SimulationNotifiable
                 mainframe.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
                 StringBuilder sb = new StringBuilder();
-                sb.append(dictionary.getValue("statusbar.running"));
+                sb.append("Running");
                 sb.append(" - ");
                 sb.append(getCurrentPlayerCount());
                 sb.append(" Players");
@@ -784,13 +762,13 @@ public final class GUI implements SimulationNotifiable
             }
             
             if (profile.getHandType() == HandType.RANDOM) {
-                model.setValueAt(dictionary.getValue("table.handoptions.handtype.random"), i, 1);
+                model.setValueAt("Random", i, 1);
                 model.setValueAt(" ", i, 2);
             } else if (profile.getHandType() == HandType.RANGE) {
-                model.setValueAt(dictionary.getValue("table.handoptions.handtype.range"), i, 1);
+                model.setValueAt("Range", i, 1);
                 model.setValueAt(Integer.toString(profile.getRange().getPercentage()) + " %", i, 2);
             } else if (profile.getHandType() == HandType.EXACTCARDS) {
-                model.setValueAt(dictionary.getValue("table.handoptions.handtype.exactcards"), i, 1);
+                model.setValueAt("Exact Cards", i, 1);
                 StringBuilder sb = new StringBuilder();
                 Card[] c = profile.getCards();
                 for (Card card : c) {
@@ -916,16 +894,11 @@ public final class GUI implements SimulationNotifiable
             df.setMaximumFractionDigits(2);
             df.setMinimumFractionDigits(2);
 
-            statusBar.setText(
-                dictionary.getValue("statusbar.done") +
-                "(" +
-                df.format(durationSeconds) + " " +
-                dictionary.getValue("statusbar.seconds") + ")"
-            );
+            statusBar.setText("Done (" + df.format(durationSeconds) + " seconds)");
             
             viewGraphButton.setEnabled(true);
         } else {
-            statusBar.setText(dictionary.getValue("statusbar.stopped"));
+            statusBar.setText("Stopped");
             viewGraphButton.setEnabled(false);
         }
     }
@@ -1034,9 +1007,9 @@ public final class GUI implements SimulationNotifiable
             
             HandType selectedHandType = getSelectedHandType();
             if (selectedHandType == HandType.RANGE) {
-                selectButton.setText(dictionary.getValue("button.handoptions.chooserange"));
+                selectButton.setText("Choose Range");
             } else if (selectedHandType == HandType.EXACTCARDS) {
-                selectButton.setText(dictionary.getValue("button.handoptions.choosecards"));
+                selectButton.setText("Choose Cards");
             } else if (selectedHandType == HandType.RANDOM) {
                 PokerType gameType = getSelectedVariation();
                 

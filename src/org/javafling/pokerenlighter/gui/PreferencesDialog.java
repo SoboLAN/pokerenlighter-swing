@@ -15,8 +15,6 @@ import javax.swing.event.ChangeListener;
 /**
  *
  * @author Radu Murzea
- * 
- * @version 1.0
  */
 public class PreferencesDialog
 {
@@ -26,9 +24,9 @@ public class PreferencesDialog
     
     private JDialog optionsdialog;
     
-    private JPanel languagePanel, lnfPanel, roundsPanel, graphPanel, buttonsPanel;
+    private JPanel lnfPanel, roundsPanel, graphPanel, buttonsPanel;
 
-    private JComboBox languageBox, lnfBox;
+    private JComboBox lnfBox;
     
     private JSlider roundsSlider;
     private JTextField roundsText, winsCode, losesCode, tiesCode;
@@ -40,23 +38,18 @@ public class PreferencesDialog
     
     private int[][] colorValues;
     
-    private PEDictionary dictionary;
-    
-    public PreferencesDialog (JFrame parent, PEDictionary dictionary)
+    public PreferencesDialog (JFrame parent)
     {
         this.parent = parent;
-        
-        this.dictionary = dictionary;
         
         options = OptionsContainer.getOptionsContainer();
     }
     
     public void display()
     {
-        optionsdialog = new JDialog(parent, dictionary.getValue("title.prefs"), true);
+        optionsdialog = new JDialog(parent, "Preferences", true);
         optionsdialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         
-        languagePanel = createLanguagePanel();
         lnfPanel = createlnfPanel();
         roundsPanel = createRoundsPanel();
         graphPanel = createGraphPanel();
@@ -64,11 +57,10 @@ public class PreferencesDialog
         
         JPanel mainPanel = new JPanel(new BorderLayout());
         
-        JPanel northPanel = new JPanel(new GridLayout(2, 1));
+        JPanel northPanel = new JPanel(new GridLayout(1, 1));
         
-        GUIUtilities.setBorder(northPanel, dictionary.getValue("title.prefs.general"), TitledBorder.LEFT);
+        GUIUtilities.setBorder(northPanel, "General Options", TitledBorder.LEFT);
         
-        northPanel.add(languagePanel);
         northPanel.add(lnfPanel);
         
         mainPanel.add(northPanel, BorderLayout.NORTH);
@@ -88,37 +80,11 @@ public class PreferencesDialog
         optionsdialog.setVisible(true);
     }
     
-    private JPanel createLanguagePanel()
-    {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        
-        panel.add(new JLabel(dictionary.getValue("label.prefs.general.language")));
-        
-        String[] availableLanguages = {
-            dictionary.getValue("combobox.prefs.english"),
-            dictionary.getValue("combobox.prefs.romanian")
-        };
-        
-        String selectedLanguage = options.getLanguage().equals("English")
-            ? dictionary.getValue("combobox.prefs.english")
-            : dictionary.getValue("combobox.prefs.romanian");
-        
-        languageBox = new JComboBox(availableLanguages);
-        languageBox.setSelectedItem(selectedLanguage);
-        languageBox.addItemListener(new GeneralChangeListener());
-        
-        panel.add(languageBox);
-        
-        panel.add(new JLabel(dictionary.getValue("label.prefs.general.needrestart")));
-        
-        return panel;
-    }
-    
     private JPanel createlnfPanel()
     {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         
-        panel.add(new JLabel(dictionary.getValue("label.prefs.general.lookandfeel")));
+        panel.add(new JLabel("Look and Feel:"));
 
         lnfBox = new JComboBox(options.getAvailableLookAndFeels());
         lnfBox.setSelectedItem(options.getLookAndFeel());
@@ -126,7 +92,7 @@ public class PreferencesDialog
         
         panel.add(lnfBox);
         
-        panel.add(new JLabel(dictionary.getValue("label.prefs.general.needrestart")));
+        panel.add(new JLabel("(needs restart)"));
         
         return panel;
     }
@@ -135,9 +101,9 @@ public class PreferencesDialog
     {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         
-        GUIUtilities.setBorder(panel, dictionary.getValue("title.prefs.simulation"), TitledBorder.LEFT);
+        GUIUtilities.setBorder(panel, "Simulation", TitledBorder.LEFT);
         
-        panel.add(new JLabel(dictionary.getValue("label.prefs.simulation.rounds")));
+        panel.add(new JLabel("Rounds per Simulation:"));
         
         DecimalFormat df = new DecimalFormat();
         df.setGroupingSize(3);
@@ -167,7 +133,7 @@ public class PreferencesDialog
     {
         JPanel panel = new JPanel(new BorderLayout());
         
-        GUIUtilities.setBorder(panel, dictionary.getValue("title.prefs.graph"), TitledBorder.CENTER);
+        GUIUtilities.setBorder(panel, "Bar Graph Options", TitledBorder.CENTER);
                 
         JPanel colorsPanel = new JPanel(new GridLayout(3, 1));
         
@@ -188,7 +154,7 @@ public class PreferencesDialog
         
         JPanel winsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         
-        GUIUtilities.setBorder(winsPanel, dictionary.getValue("title.prefs.wins"), TitledBorder.LEFT);
+        GUIUtilities.setBorder(winsPanel, "Wins", TitledBorder.LEFT);
             
         SpinnerNumberModel winsRedModel = new SpinnerNumberModel(colorValues[0][0], 0, 255, 1);
         colorSpinners[0][0] = new JSpinner(winsRedModel);
@@ -202,11 +168,11 @@ public class PreferencesDialog
         colorSpinners[0][2] = new JSpinner(winsBlueModel);
         ((DefaultEditor) colorSpinners[0][2].getEditor()).getTextField().setEditable (false);
         
-        winsPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.red")));
+        winsPanel.add(new JLabel("Red:"));
         winsPanel.add(colorSpinners[0][0]);
-        winsPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.green")));
+        winsPanel.add(new JLabel("Green:"));
         winsPanel.add(colorSpinners[0][1]);
-        winsPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.blue")));
+        winsPanel.add(new JLabel("Blue:"));
         winsPanel.add(colorSpinners[0][2]);
         
         winsCode = new JTextField(6);
@@ -215,7 +181,7 @@ public class PreferencesDialog
                         Integer.toHexString(colorValues[0][2]).toUpperCase());
         winsCode.setEditable(false);
         
-        winsPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.colorcode")));
+        winsPanel.add(new JLabel("Color Code:"));
         winsPanel.add(winsCode);
 
         winsColorLabel = new JLabel();
@@ -233,7 +199,7 @@ public class PreferencesDialog
         
         JPanel losesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         
-        GUIUtilities.setBorder(losesPanel, dictionary.getValue("title.prefs.loses"), TitledBorder.LEFT);
+        GUIUtilities.setBorder(losesPanel, "Loses", TitledBorder.LEFT);
         
         SpinnerNumberModel losesRedModel = new SpinnerNumberModel(colorValues[1][0], 0, 255, 1);
         colorSpinners[1][0] = new JSpinner(losesRedModel);
@@ -247,11 +213,11 @@ public class PreferencesDialog
         colorSpinners[1][2] = new JSpinner(losesBlueModel);
         ((DefaultEditor) colorSpinners[1][2].getEditor()).getTextField().setEditable(false);
         
-        losesPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.red")));
+        losesPanel.add(new JLabel("Red:"));
         losesPanel.add(colorSpinners[1][0]);
-        losesPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.green")));
+        losesPanel.add(new JLabel("Green:"));
         losesPanel.add(colorSpinners[1][1]);
-        losesPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.blue")));
+        losesPanel.add(new JLabel("Blue:"));
         losesPanel.add(colorSpinners[1][2]);
         
         losesCode = new JTextField(6);
@@ -260,7 +226,7 @@ public class PreferencesDialog
                         Integer.toHexString(colorValues[1][2]).toUpperCase());
         losesCode.setEditable(false);
         
-        losesPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.colorcode")));
+        losesPanel.add(new JLabel("Color Code:"));
         losesPanel.add(losesCode);
 
         losesColorLabel = new JLabel();
@@ -278,7 +244,7 @@ public class PreferencesDialog
         
         JPanel tiesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         
-        GUIUtilities.setBorder(tiesPanel, dictionary.getValue("title.prefs.ties"), TitledBorder.LEFT);
+        GUIUtilities.setBorder(tiesPanel, "Ties", TitledBorder.LEFT);
         
         SpinnerNumberModel tiesRedModel = new SpinnerNumberModel(colorValues[2][0], 0, 255, 1);
         colorSpinners[2][0] = new JSpinner(tiesRedModel);
@@ -292,11 +258,11 @@ public class PreferencesDialog
         colorSpinners[2][2] = new JSpinner(tiesBlueModel);
         ((DefaultEditor) colorSpinners[2][2].getEditor()).getTextField().setEditable(false);
         
-        tiesPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.red")));
+        tiesPanel.add(new JLabel("Red:"));
         tiesPanel.add(colorSpinners[2][0]);
-        tiesPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.green")));
+        tiesPanel.add(new JLabel("Green:"));
         tiesPanel.add(colorSpinners[2][1]);
-        tiesPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.blue")));
+        tiesPanel.add(new JLabel("Blue:"));
         tiesPanel.add(colorSpinners[2][2]);
         
         tiesCode = new JTextField(6);
@@ -305,7 +271,7 @@ public class PreferencesDialog
                         Integer.toHexString(colorValues[2][2]).toUpperCase());
         tiesCode.setEditable(false);
         
-        tiesPanel.add(new JLabel(dictionary.getValue("label.prefs.graph.colorcode")));
+        tiesPanel.add(new JLabel("Color Code:"));
         tiesPanel.add(tiesCode);
         
         Color tiesColor = new Color(70, 94, 91);
@@ -355,7 +321,7 @@ public class PreferencesDialog
         
         JPanel percentagePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         percentagePanel.add(displayLabelCheckBox);
-        percentagePanel.add(new JLabel(dictionary.getValue("label.prefs.graph.displaygraph")));
+        percentagePanel.add(new JLabel("Display Percentage Label"));
         
         JPanel stackedPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         stackedPanel.add(isGraphStackedCheckBox);
@@ -376,9 +342,9 @@ public class PreferencesDialog
     {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         
-        okButton = new JButton(dictionary.getValue("button.prefs.ok"));
-        cancelButton = new JButton(dictionary.getValue("button.prefs.cancel"));        
-        applyButton = new JButton(dictionary.getValue("button.prefs.apply"));
+        okButton = new JButton("OK");
+        cancelButton = new JButton("Cancel");        
+        applyButton = new JButton("Apply");
         
         applyButton.setEnabled(false);
         
@@ -412,7 +378,6 @@ public class PreferencesDialog
         @Override
         public void actionPerformed(ActionEvent e)
         {
-            options.setLanguage(languageBox.getSelectedIndex());
             options.setLookAndFeel(lnfBox.getSelectedIndex());
             options.setRounds(1000 * roundsSlider.getValue());
             options.setWinsRed(colorValues[0][0]);
