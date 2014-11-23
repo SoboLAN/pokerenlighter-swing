@@ -1,5 +1,7 @@
-package org.javafling.pokerenlighter.gui;
+package org.javafling.pokerenlighter.general;
 
+import org.javafling.pokerenlighter.utilities.GUIUtilities;
+import org.javafling.pokerenlighter.utilities.OptionsContainer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;

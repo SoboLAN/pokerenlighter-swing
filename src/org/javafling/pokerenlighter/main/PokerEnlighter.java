@@ -10,9 +10,9 @@ import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-import org.javafling.pokerenlighter.gui.GUI;
-import org.javafling.pokerenlighter.gui.GUIUtilities;
-import org.javafling.pokerenlighter.gui.OptionsContainer;
+import org.javafling.pokerenlighter.general.GUI;
+import org.javafling.pokerenlighter.utilities.GUIUtilities;
+import org.javafling.pokerenlighter.utilities.OptionsContainer;
 
 /**
  * Main entry point of Poker Enlighter. Contains all relevant information about the program.

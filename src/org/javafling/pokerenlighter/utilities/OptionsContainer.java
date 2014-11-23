@@ -1,4 +1,4 @@
-package org.javafling.pokerenlighter.gui;
+package org.javafling.pokerenlighter.utilities;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

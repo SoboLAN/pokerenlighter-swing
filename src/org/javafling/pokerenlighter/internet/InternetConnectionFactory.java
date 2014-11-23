@@ -1,4 +1,4 @@
-package org.javafling.pokerenlighter.main;
+package org.javafling.pokerenlighter.internet;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

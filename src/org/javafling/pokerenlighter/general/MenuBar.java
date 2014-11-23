@@ -1,5 +1,6 @@
-package org.javafling.pokerenlighter.gui;
+package org.javafling.pokerenlighter.general;
 
+import org.javafling.pokerenlighter.utilities.GUIUtilities;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -9,8 +10,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.SwingWorker;
-import org.javafling.pokerenlighter.main.InternetConnection;
-import org.javafling.pokerenlighter.main.InternetConnectionFactory;
+import org.javafling.pokerenlighter.internet.InternetConnection;
+import org.javafling.pokerenlighter.internet.InternetConnectionFactory;
 import org.javafling.pokerenlighter.main.PokerEnlighter;
 
 /**

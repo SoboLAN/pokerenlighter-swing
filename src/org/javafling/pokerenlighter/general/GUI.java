@@ -1,10 +1,12 @@
-package org.javafling.pokerenlighter.gui;
+package org.javafling.pokerenlighter.general;
 
+import org.javafling.pokerenlighter.utilities.GUIUtilities;
+import org.javafling.pokerenlighter.utilities.OptionsContainer;
+import org.javafling.pokerenlighter.statusbar.StatusBar;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,19 +28,21 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import org.javafling.pokerenlighter.combination.Card;
+import org.javafling.pokerenlighter.event.AbstractEvent;
+import org.javafling.pokerenlighter.event.EventTriggerer;
+import org.javafling.pokerenlighter.event.ListenerInterface;
+import org.javafling.pokerenlighter.generalchoices.GeneralChoicesPanel;
+import org.javafling.pokerenlighter.generalchoices.PlayerCountChangeEvent;
+import org.javafling.pokerenlighter.generalchoices.PokerTypeChangeEvent;
 import org.javafling.pokerenlighter.simulation.HandType;
 import org.javafling.pokerenlighter.simulation.PlayerProfile;
 import org.javafling.pokerenlighter.simulation.PokerType;
@@ -49,11 +53,10 @@ import org.javafling.pokerenlighter.simulation.SimulationFinalResult;
 import org.javafling.pokerenlighter.simulation.SimulationNotifiable;
 import org.javafling.pokerenlighter.simulation.Simulator;
 
-/** Main GUI (Graphical User Interface) class.
- *
- * @author Radu Murzea
+/** 
+ * Main GUI (Graphical User Interface) class.
  */
-public final class GUI implements SimulationNotifiable
+public final class GUI implements SimulationNotifiable, ListenerInterface
 {
     private static GUI _instance;
     
@@ -63,12 +66,11 @@ public final class GUI implements SimulationNotifiable
     private String blankCardPath = "images/blank.card.gif";
     
     private JFrame mainframe;
-
-    private JPanel customPanel;
+    
     private JPanel playersPanel;
     private JPanel progressPanel;
     private JPanel choicesPanel;
-    private JPanel generalChoicesPanel;
+    private GeneralChoicesPanel generalChoicesPanel;
     private JPanel communityPanel;
     private JPanel resultsPanel;
     
@@ -76,9 +78,8 @@ public final class GUI implements SimulationNotifiable
     
     private JTable choicesTable, resultsTable;
     private JComboBox<Integer> playerIDBox;
-    private JComboBox<String> handTypeBox, variationBox;
+    private JComboBox<String> handTypeBox;
     private JButton selectButton, startButton, stopButton, exportButton, viewGraphButton;
-    private JSpinner playersCount;
     private JCheckBox enableFlop, enableTurn, enableRiver;
     private JLabel flopCard1, flopCard2, flopCard3, turnCard, riverCard;
     private JProgressBar progressBar;
@@ -96,9 +97,12 @@ public final class GUI implements SimulationNotifiable
 
         return _instance;
     }
-        
+    
     private GUI()
     {
+        EventTriggerer.getInstance().addListener(this, new PlayerCountChangeEvent().getName());
+        EventTriggerer.getInstance().addListener(this, new PokerTypeChangeEvent().getName());
+        
         holdemProfiles = new PlayerProfile[MAX_PLAYERS];
         omahaProfiles = new PlayerProfile[MAX_PLAYERS];
         omahaHiLoProfiles = new PlayerProfile[MAX_PLAYERS];
@@ -117,7 +121,7 @@ public final class GUI implements SimulationNotifiable
         mainframe.setJMenuBar(menuBar.getMenuBar());
         mainframe.setLayout(new BorderLayout());
         
-        customPanel = createCustomPanel();
+        JPanel customPanel = createCustomPanel();
         mainframe.add(customPanel, BorderLayout.CENTER);
         
         statusBar = new StatusBar("Ready");
@@ -150,6 +154,18 @@ public final class GUI implements SimulationNotifiable
         mainframe.setResizable(on);
     }
     
+    @Override
+    public void onUIUpdate(AbstractEvent event)
+    {
+        if (event instanceof PlayerCountChangeEvent) {
+            this.setChoicesTableContent();
+            this.adjustAvailablePlayerIDs();
+        } else if (event instanceof PokerTypeChangeEvent) {
+            this.setChoicesTableContent();
+            this.setCommunityCardsContent();
+        }
+    }
+    
     public void newSimulation()
     {
         if (simulator != null) {
@@ -172,10 +188,10 @@ public final class GUI implements SimulationNotifiable
             omahaHiLoCommunityCards[i] = null;
         }
         
-        playersCount.setValue(2);
+        this.generalChoicesPanel.setPlayerCount(2);
         adjustAvailablePlayerIDs();
         
-        variationBox.setSelectedIndex(0);
+        this.generalChoicesPanel.setSelectedPokerTypeIndex(0);
         
         handTypeBox.setSelectedIndex(0);
         
@@ -198,7 +214,8 @@ public final class GUI implements SimulationNotifiable
     {
         JPanel panel = new JPanel(new BorderLayout());
 
-        generalChoicesPanel = createPlayersVariationPanel();
+        generalChoicesPanel = new GeneralChoicesPanel(MAX_PLAYERS);
+        GUIUtilities.setBorder(generalChoicesPanel, "General Options", TitledBorder.CENTER);
         panel.add(generalChoicesPanel, BorderLayout.NORTH);
 
         JPanel middlePanel = new JPanel(new BorderLayout());
@@ -224,7 +241,7 @@ public final class GUI implements SimulationNotifiable
     {
         JPanel panel = new JPanel(new BorderLayout());
         
-        GUIUtilities.setBorder(panel, "Hand Options", TitledBorder.LEFT);
+        GUIUtilities.setBorder(panel, "Hand Options", TitledBorder.CENTER);
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         
@@ -266,10 +283,10 @@ public final class GUI implements SimulationNotifiable
         String[] titles = {"Player", "Hand Type", "Selection"};
         
         Object[][] rows = new String[MAX_PLAYERS][3];
-        for (int i = 0; i < getCurrentPlayerCount(); i++) {
+        for (int i = 0; i < this.generalChoicesPanel.getPlayerCount(); i++) {
             rows[i][0] = Integer.toString(i + 1);
         }
-        for (int i = getCurrentPlayerCount(); i < MAX_PLAYERS; i++) {
+        for (int i = this.generalChoicesPanel.getPlayerCount(); i < MAX_PLAYERS; i++) {
             rows[i][0] = " ";
         }
 
@@ -302,42 +319,12 @@ public final class GUI implements SimulationNotifiable
         
         return panel;
     }
-    
-    private JPanel createPlayersVariationPanel()
-    {
-        JPanel panel = new JPanel(new GridLayout(1, 2));
         
-        GUIUtilities.setBorder(panel, "General Options", TitledBorder.LEFT);
-        
-        JPanel nrPlayersPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    
-        SpinnerNumberModel playersModel = new SpinnerNumberModel(2, 2, MAX_PLAYERS, 1);        
-        playersCount = new JSpinner (playersModel);
-        ((JSpinner.DefaultEditor) playersCount.getEditor()).getTextField().setEditable(false);
-        playersCount.addChangeListener(new PlayerCountSpinnerListener());
-
-        nrPlayersPanel.add(new JLabel("Number of Players:"));
-        nrPlayersPanel.add(playersCount);
-        
-        JPanel variationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        
-        variationBox = new JComboBox<>(new String[]{"Texas Hold'em", "Omaha", "Omaha Hi/Lo"});
-        variationBox.addItemListener(new PokerTypeListener());
-        variationBox.setEditable(false);
-        variationPanel.add(new JLabel("Poker Type:"));
-        variationPanel.add(variationBox);
-        
-        panel.add(nrPlayersPanel);
-        panel.add(variationPanel);
-        
-        return panel;
-    }
-    
     private JPanel createCommunityPanel()
     {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        GUIUtilities.setBorder(panel, "Community Cards", TitledBorder.LEFT);
+        GUIUtilities.setBorder(panel, "Community Cards", TitledBorder.CENTER);
         
         enableFlop = new JCheckBox("Flop:");
         
@@ -377,7 +364,7 @@ public final class GUI implements SimulationNotifiable
     {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
 
-        GUIUtilities.setBorder(panel, "Controls", TitledBorder.LEFT);
+        GUIUtilities.setBorder(panel, "Controls", TitledBorder.CENTER);
                 
         startButton = new JButton("Start");
         startButton.addActionListener(new StartSimulationListener());
@@ -459,13 +446,13 @@ public final class GUI implements SimulationNotifiable
             public void run()
             {
                 handTypeBox.setEnabled(false);
-                variationBox.setEnabled(false);
+                generalChoicesPanel.setSelectedPokerTypeEnabled(false);
                 playerIDBox.setEnabled(false);
                 viewGraphButton.setEnabled(false);
                 exportButton.setEnabled(false);
                 startButton.setEnabled(false);
                 stopButton.setEnabled(true);
-                playersCount.setEnabled(false);
+                generalChoicesPanel.setPlayerCountEnabled(false);
                 enableFlop.setEnabled(false);
                 enableTurn.setEnabled(false);
                 enableRiver.setEnabled(false);
@@ -475,7 +462,7 @@ public final class GUI implements SimulationNotifiable
                 StringBuilder sb = new StringBuilder();
                 sb.append("Running");
                 sb.append(" - ");
-                sb.append(getCurrentPlayerCount());
+                sb.append(generalChoicesPanel.getPlayerCount());
                 sb.append(" Players");
                 sb.append(" - ");
                 sb.append(OptionsContainer.getOptionsContainer().getRounds());
@@ -543,7 +530,7 @@ public final class GUI implements SimulationNotifiable
         public void actionPerformed(ActionEvent e)
         {
             simulator = new Simulator(
-                getSelectedVariation(),
+                generalChoicesPanel.getSelectedVariation(),
                 OptionsContainer.getOptionsContainer().getRounds(),
                 _instance
             );
@@ -567,12 +554,12 @@ public final class GUI implements SimulationNotifiable
         
         private void setPlayers()
         {
-            for (int i = 0; i < getCurrentPlayerCount(); i++) {
-                if (getSelectedVariation() == PokerType.TEXAS_HOLDEM) {
+            for (int i = 0; i < generalChoicesPanel.getPlayerCount(); i++) {
+                if (generalChoicesPanel.getSelectedVariation() == PokerType.TEXAS_HOLDEM) {
                     simulator.addPlayer(holdemProfiles[i]);
-                } else if (getSelectedVariation() == PokerType.OMAHA) {
+                } else if (generalChoicesPanel.getSelectedVariation() == PokerType.OMAHA) {
                     simulator.addPlayer(omahaProfiles[i]);
-                } else if (getSelectedVariation() == PokerType.OMAHA_HILO) {
+                } else if (generalChoicesPanel.getSelectedVariation() == PokerType.OMAHA_HILO) {
                     simulator.addPlayer(omahaHiLoProfiles[i]);
                 }
             }
@@ -583,19 +570,19 @@ public final class GUI implements SimulationNotifiable
             Card[] flop = new Card[3];
             Card turnCard = null;
             Card riverCard = null;
-            if (getSelectedVariation() == PokerType.TEXAS_HOLDEM) {
+            if (generalChoicesPanel.getSelectedVariation() == PokerType.TEXAS_HOLDEM) {
                 flop[0] = holdemCommunityCards[0];
                 flop[1] = holdemCommunityCards[1];
                 flop[2] = holdemCommunityCards[2];
                 turnCard = holdemCommunityCards[3];
                 riverCard = holdemCommunityCards[4];
-            } else if (getSelectedVariation() == PokerType.OMAHA) {
+            } else if (generalChoicesPanel.getSelectedVariation() == PokerType.OMAHA) {
                 flop[0] = omahaCommunityCards[0];
                 flop[1] = omahaCommunityCards[1];
                 flop[2] = omahaCommunityCards[2];
                 turnCard = omahaCommunityCards[3];
                 riverCard = omahaCommunityCards[4];
-            } else if (getSelectedVariation() == PokerType.OMAHA_HILO) {
+            } else if (generalChoicesPanel.getSelectedVariation() == PokerType.OMAHA_HILO) {
                 flop[0] = omahaHiLoCommunityCards[0];
                 flop[1] = omahaHiLoCommunityCards[1];
                 flop[2] = omahaHiLoCommunityCards[2];
@@ -684,7 +671,7 @@ public final class GUI implements SimulationNotifiable
                 return;
             }
 
-            PokerType selectedPokerType = getSelectedVariation();
+            PokerType selectedPokerType = generalChoicesPanel.getSelectedVariation();
             
             ArrayList<Card> usedCards = getUsedCards(selectedPokerType);
             
@@ -743,9 +730,9 @@ public final class GUI implements SimulationNotifiable
 
     private void setChoicesTableContent()
     {
-        PokerType gameType = getSelectedVariation();
+        PokerType gameType = this.generalChoicesPanel.getSelectedVariation();
         
-        int nrPlayersToFill = getCurrentPlayerCount();
+        int nrPlayersToFill = this.generalChoicesPanel.getPlayerCount();
         
         TableModel model = choicesTable.getModel();
         
@@ -787,7 +774,7 @@ public final class GUI implements SimulationNotifiable
     
     private void setCommunityCardsContent()
     {
-        PokerType gameType = getSelectedVariation();
+        PokerType gameType = this.generalChoicesPanel.getSelectedVariation();
         
         Card[] currentCommunityCards = null;
         
@@ -875,12 +862,12 @@ public final class GUI implements SimulationNotifiable
     private void setGUIElementsDone(boolean stopped, SimulationFinalResult result)
     {
         handTypeBox.setEnabled(true);
-        variationBox.setEnabled(true);
+        this.generalChoicesPanel.setSelectedPokerTypeEnabled(true);
         exportButton.setEnabled(true);
         playerIDBox.setEnabled(true);
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
-        playersCount.setEnabled(true);
+        this.generalChoicesPanel.setPlayerCountEnabled(true);
         enableFlop.setEnabled(true);
         enableTurn.setEnabled(true);
         enableRiver.setEnabled(true);
@@ -902,18 +889,7 @@ public final class GUI implements SimulationNotifiable
             viewGraphButton.setEnabled(false);
         }
     }
-    
-    private class PlayerCountSpinnerListener implements ChangeListener
-    {
-        @Override
-        public void stateChanged(ChangeEvent e)
-        {
-            setChoicesTableContent();
-            
-            adjustAvailablePlayerIDs();
-        }
-    }
-    
+        
     private class ViewGraphListener implements ActionListener
     {
         @Override
@@ -934,7 +910,7 @@ public final class GUI implements SimulationNotifiable
         @Override
         public void actionPerformed(ActionEvent e)
         {
-            PokerType selectedPokerType = getSelectedVariation();
+            PokerType selectedPokerType = generalChoicesPanel.getSelectedVariation();
             HandType selectedHandType = getSelectedHandType();
             int selectedPlayer = playerIDBox.getSelectedIndex();
             
@@ -1011,7 +987,7 @@ public final class GUI implements SimulationNotifiable
             } else if (selectedHandType == HandType.EXACTCARDS) {
                 selectButton.setText("Choose Cards");
             } else if (selectedHandType == HandType.RANDOM) {
-                PokerType gameType = getSelectedVariation();
+                PokerType gameType = generalChoicesPanel.getSelectedVariation();
                 
                 int player = playerIDBox.getSelectedIndex();
                 
@@ -1025,17 +1001,6 @@ public final class GUI implements SimulationNotifiable
 
                 setChoicesTableContent();
             }
-        }
-    }
-    
-    private class PokerTypeListener implements ItemListener
-    {
-        @Override
-        public void itemStateChanged(ItemEvent e)
-        {
-            setChoicesTableContent();
-            
-            setCommunityCardsContent();
         }
     }
     
@@ -1061,23 +1026,11 @@ public final class GUI implements SimulationNotifiable
     {
         playerIDBox.removeAllItems();
         
-        for (int i = 1; i <= getCurrentPlayerCount(); i++) {
+        for (int i = 1; i <= this.generalChoicesPanel.getPlayerCount(); i++) {
             playerIDBox.addItem(i);
         }
     }
     
-    private int getCurrentPlayerCount()
-    {
-        //playersCount might not yet be created(depends on the order of creation of panels)
-        if (playersCount == null) {
-            return 2;
-        } else {
-            Integer c = (Integer) playersCount.getValue();
-        
-            return c;
-        }
-    }
-
     private ArrayList<Card> getUsedCards(PokerType selectedVariation)
     {
         ArrayList<Card> usedCards = new ArrayList<>();
@@ -1136,20 +1089,8 @@ public final class GUI implements SimulationNotifiable
                 }
             }
         }
-                        
+        
         return usedCards;
-    }
-    
-    private PokerType getSelectedVariation()
-    {
-        int selectedVariation = variationBox.getSelectedIndex();
-
-        switch(selectedVariation) {
-            case 0: return PokerType.TEXAS_HOLDEM;
-            case 1: return PokerType.OMAHA;
-            case 2: return PokerType.OMAHA_HILO;
-            default: return null;
-        }
     }
     
     private HandType getSelectedHandType()

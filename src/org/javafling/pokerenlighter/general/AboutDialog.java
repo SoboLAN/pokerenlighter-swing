@@ -1,4 +1,4 @@
-package org.javafling.pokerenlighter.gui;
+package org.javafling.pokerenlighter.general;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

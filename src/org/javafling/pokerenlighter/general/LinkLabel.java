@@ -1,4 +1,4 @@
-package org.javafling.pokerenlighter.gui;
+package org.javafling.pokerenlighter.general;
 
 import java.awt.Cursor;
 import java.awt.Desktop;
@@ -28,7 +28,7 @@ public class LinkLabel extends JLabel
         this.URL = URL;
         
         if (isBrowsingSupported()) {
-            setText(linkIfy());
+            setText(linkify());
             setCursor(new Cursor(Cursor.HAND_CURSOR));
             addMouseListener(new LinkMouseListener());
         }
@@ -39,16 +39,17 @@ public class LinkLabel extends JLabel
         return Desktop.isDesktopSupported() ? Desktop.getDesktop().isSupported(Desktop.Action.BROWSE) : false;
     }
 
-    private String linkIfy()
+    private String linkify()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append(HTML);
-        sb.append(HREF_START);
-        sb.append(URL);
-        sb.append(HREF_CLOSED);
-        sb.append(getText());
-        sb.append(HREF_END);
-        sb.append(HTML_END);
+        
+        sb.append(HTML)
+            .append(HREF_START)
+            .append(URL)
+            .append(HREF_CLOSED)
+            .append(getText())
+            .append(HREF_END)
+            .append(HTML_END);
         
         return sb.toString();
     }

@@ -1,4 +1,4 @@
-package org.javafling.pokerenlighter.gui;
+package org.javafling.pokerenlighter.utilities;
 
 import java.awt.Component;
 import java.awt.Dimension;
