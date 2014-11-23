@@ -5,27 +5,18 @@ import org.javafling.pokerenlighter.utilities.OptionsContainer;
 import org.javafling.pokerenlighter.statusbar.StatusBar;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.FlowLayout;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import org.javafling.pokerenlighter.combination.Card;
 import org.javafling.pokerenlighter.community.CommunityMouseEvent;
@@ -42,6 +33,9 @@ import org.javafling.pokerenlighter.players.SelectButtonEvent;
 import org.javafling.pokerenlighter.progress.ProgressPanel;
 import org.javafling.pokerenlighter.progress.SimulationStartEvent;
 import org.javafling.pokerenlighter.progress.SimulationStopEvent;
+import org.javafling.pokerenlighter.results.ResultXMLButtonEvent;
+import org.javafling.pokerenlighter.results.ResultsPanel;
+import org.javafling.pokerenlighter.results.ViewGraphButtonEvent;
 import org.javafling.pokerenlighter.simulation.HandType;
 import org.javafling.pokerenlighter.simulation.PlayerProfile;
 import org.javafling.pokerenlighter.simulation.PokerType;
@@ -70,13 +64,9 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
     private ProgressPanel progressPanel;
     private GeneralChoicesPanel generalChoicesPanel;
     private CommunityPanel communityPanel;
-    private JPanel resultsPanel;
+    private ResultsPanel resultsPanel;
     
     private StatusBar statusBar;
-    
-    private JTable resultsTable;
-    
-    private JButton exportButton, viewGraphButton;
     
     private PlayerProfile[] holdemProfiles, omahaProfiles, omahaHiLoProfiles;
     private Card[] holdemCommunityCards, omahaCommunityCards, omahaHiLoCommunityCards;
@@ -101,6 +91,8 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         EventTriggerer.getInstance().addListener(this, CommunityMouseEvent.NAME);
         EventTriggerer.getInstance().addListener(this, SimulationStartEvent.NAME);
         EventTriggerer.getInstance().addListener(this, SimulationStopEvent.NAME);
+        EventTriggerer.getInstance().addListener(this, ViewGraphButtonEvent.NAME);
+        EventTriggerer.getInstance().addListener(this, ResultXMLButtonEvent.NAME);
         
         this.holdemProfiles = new PlayerProfile[GUI.MAX_PLAYERS];
         this.omahaProfiles = new PlayerProfile[GUI.MAX_PLAYERS];
@@ -173,6 +165,10 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
             this.startSimulationAction();
         } else if (event instanceof SimulationStopEvent) {
             this.stopSimulationAction();
+        } else if (event instanceof ResultXMLButtonEvent) {
+            this.xmlResultAction();
+        } else if (event instanceof ViewGraphButtonEvent) {
+            this.viewGraphAction();
         }
     }
     
@@ -212,8 +208,8 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         setChoicesTableContent();
         
         this.progressPanel.setStopButtonEnabled(false);
-        this.viewGraphButton.setEnabled(false);
-        this.exportButton.setEnabled(false);
+        this.resultsPanel.setViewGraphButtonEnabled(false);
+        this.resultsPanel.setExportButtonEnabled(false);
         
         this.progressPanel.setProgressBarValue(0);
         
@@ -244,66 +240,13 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
 
         panel.add(middlePanel, BorderLayout.CENTER);
         
-        resultsPanel = createResultsPanel();
+        this.resultsPanel = new ResultsPanel(GUI.MAX_PLAYERS);
+        GUIUtilities.setBorder(this.resultsPanel, "Results", TitledBorder.CENTER);
         panel.add(resultsPanel, BorderLayout.SOUTH);
         
         return panel;
     }
     
-    private JPanel createResultsPanel()
-    {
-        JPanel panel = new JPanel(new BorderLayout());
-        
-        GUIUtilities.setBorder(panel, "Results", TitledBorder.CENTER);
-        
-        String[] titles = {"Player", "Wins", "Loses", "Ties"};
-        
-        Object[][] rows = new String[MAX_PLAYERS][4];
-        
-        for (int i = 0; i < MAX_PLAYERS; i++) {
-            rows[i][0] = " ";
-        }
-        
-        DefaultTableModel model = new DefaultTableModel(rows, titles)
-        {
-            @Override
-            public boolean isCellEditable(int row, int column)
-            {
-                return false;
-            }
-        };
-        
-        resultsTable = new JTable(model);
-    
-        resultsTable.getTableHeader().setReorderingAllowed(false);
-        resultsTable.getColumnModel().setColumnSelectionAllowed(false);
-        
-        for (int i = 0; i < 4; i++) {
-            DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
-            dtcr.setHorizontalAlignment(SwingConstants.CENTER);
-            
-            TableColumn col = resultsTable.getColumnModel().getColumn(i);
-            col.setCellRenderer(dtcr);
-        }
-
-        panel.add(resultsTable.getTableHeader(), BorderLayout.PAGE_START);
-        panel.add(resultsTable, BorderLayout.CENTER);
-        
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        
-        exportButton = new JButton("Export to XML");
-        exportButton.addActionListener(new ResultXMLListener());
-        viewGraphButton = new JButton("View Graph");
-        viewGraphButton.addActionListener(new ViewGraphListener());
-        
-        buttonsPanel.add(viewGraphButton);
-        buttonsPanel.add(exportButton);
-
-        panel.add(buttonsPanel, BorderLayout.SOUTH);
-        
-        return panel;
-    }
-
     @Override
     public void onSimulationStart(final SimulationEvent event)
     {
@@ -314,8 +257,8 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
                 playersPanel.setHandTypeEnabled(false);
                 generalChoicesPanel.setSelectedPokerTypeEnabled(false);
                 playersPanel.setPlayerIDEnabled(false);
-                viewGraphButton.setEnabled(false);
-                exportButton.setEnabled(false);
+                resultsPanel.setViewGraphButtonEnabled(false);
+                resultsPanel.setExportButtonEnabled(false);
                 progressPanel.setStartButtonEnabled(false);
                 progressPanel.setStopButtonEnabled(true);
                 generalChoicesPanel.setPlayerCountEnabled(false);
@@ -672,7 +615,7 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
     
     private void setResultsTableContent(SimulationFinalResult result)
     {
-        TableModel model = resultsTable.getModel();
+        TableModel model = this.resultsPanel.getResultsTableModel();
         
         if (result == null) {
             for (int i = 0; i < MAX_PLAYERS; i++) {
@@ -707,7 +650,7 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
     {
         this.playersPanel.setHandTypeEnabled(true);
         this.generalChoicesPanel.setSelectedPokerTypeEnabled(true);
-        this.exportButton.setEnabled(true);
+        this.resultsPanel.setExportButtonEnabled(true);
         this.playersPanel.setPlayerIDEnabled(true);
         this.progressPanel.setStartButtonEnabled(true);
         this.progressPanel.setStopButtonEnabled(false);
@@ -727,23 +670,19 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
 
             this.statusBar.setText("Done (" + df.format(durationSeconds) + " seconds)");
             
-            this.viewGraphButton.setEnabled(true);
+            this.resultsPanel.setViewGraphButtonEnabled(true);
         } else {
             this.statusBar.setText("Stopped");
-            this.viewGraphButton.setEnabled(false);
+            this.resultsPanel.setViewGraphButtonEnabled(false);
         }
     }
-        
-    private class ViewGraphListener implements ActionListener
+    
+    private void viewGraphAction()
     {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            String title = "Simulation Results Graph";
-            ResultChartDialog rcd = new ResultChartDialog(mainframe, title, simulator.getResult());
-            rcd.setLocationRelativeTo(mainframe);
-            rcd.setVisible(true);
-        }
+        String title = "Simulation Results Graph";
+        ResultChartDialog rcd = new ResultChartDialog(mainframe, title, simulator.getResult());
+        rcd.setLocationRelativeTo(mainframe);
+        rcd.setVisible(true);
     }
     
     public void playersButtonSelectAction()
@@ -833,20 +772,16 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         }
     }
     
-    private class ResultXMLListener implements ActionListener
+    private void xmlResultAction()
     {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showSaveDialog(mainframe);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-                    bw.write(SimulationExport.getResultXMLString(simulator.getResult()));
-                } catch(Exception ex) {
-                    GUIUtilities.showErrorDialog(mainframe, "Could not save the result", "Save Error");
-                }
+        JFileChooser fc = new JFileChooser();
+        int returnVal = fc.showSaveDialog(mainframe);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+                bw.write(SimulationExport.getResultXMLString(simulator.getResult()));
+            } catch(Exception ex) {
+                GUIUtilities.showErrorDialog(mainframe, "Could not save the result", "Save Error");
             }
         }
     }
