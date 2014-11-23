@@ -10,8 +10,6 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +17,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,6 +31,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import org.javafling.pokerenlighter.combination.Card;
+import org.javafling.pokerenlighter.community.CommunityMouseEvent;
+import org.javafling.pokerenlighter.community.CommunityPanel;
 import org.javafling.pokerenlighter.event.AbstractEvent;
 import org.javafling.pokerenlighter.event.EventTriggerer;
 import org.javafling.pokerenlighter.event.ListenerInterface;
@@ -70,7 +69,7 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
     private PlayersPanel playersPanel;
     private JPanel progressPanel;
     private GeneralChoicesPanel generalChoicesPanel;
-    private JPanel communityPanel;
+    private CommunityPanel communityPanel;
     private JPanel resultsPanel;
     
     private StatusBar statusBar;
@@ -78,8 +77,7 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
     private JTable resultsTable;
     
     private JButton startButton, stopButton, exportButton, viewGraphButton;
-    private JCheckBox enableFlop, enableTurn, enableRiver;
-    private JLabel flopCard1, flopCard2, flopCard3, turnCard, riverCard;
+    
     private JProgressBar progressBar;
     
     private PlayerProfile[] holdemProfiles, omahaProfiles, omahaHiLoProfiles;
@@ -102,16 +100,17 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         EventTriggerer.getInstance().addListener(this, new PokerTypeChangeEvent().getName());
         EventTriggerer.getInstance().addListener(this, new HandTypeChangeEvent().getName());
         EventTriggerer.getInstance().addListener(this, new SelectButtonEvent().getName());
+        EventTriggerer.getInstance().addListener(this, new CommunityMouseEvent().getName());
         
-        this.holdemProfiles = new PlayerProfile[this.MAX_PLAYERS];
-        this.omahaProfiles = new PlayerProfile[this.MAX_PLAYERS];
-        this.omahaHiLoProfiles = new PlayerProfile[this.MAX_PLAYERS];
+        this.holdemProfiles = new PlayerProfile[GUI.MAX_PLAYERS];
+        this.omahaProfiles = new PlayerProfile[GUI.MAX_PLAYERS];
+        this.omahaHiLoProfiles = new PlayerProfile[GUI.MAX_PLAYERS];
         
         this.holdemCommunityCards = new Card[5];
         this.omahaCommunityCards = new Card[5];
         this.omahaHiLoCommunityCards = new Card[5];
 
-        this.mainframe = new JFrame(windowTitle);
+        this.mainframe = new JFrame(this.windowTitle);
         this.mainframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.mainframe.setIconImage(
             Toolkit.getDefaultToolkit().getImage(getClass().getResource("images/ace_spades_icon.jpg"))
@@ -124,12 +123,12 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         JPanel customPanel = createCustomPanel();
         this.mainframe.add(customPanel, BorderLayout.CENTER);
         
-        statusBar = new StatusBar("Ready");
+        this.statusBar = new StatusBar("Ready");
         this.mainframe.add(this.statusBar, BorderLayout.SOUTH);
         
-        newSimulation();
+        this.newSimulation();
         
-        setChoicesTableContent();
+        this.setChoicesTableContent();
 
         this.mainframe.pack();
     }
@@ -167,6 +166,9 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
             this.handTypeRefresh();
         } else if (event instanceof SelectButtonEvent) {
             this.playersButtonSelectAction();
+        } else if (event instanceof CommunityMouseEvent) {
+            Street street = (Street) event.getData();
+            this.communityCardMouseClickAction(street);
         }
     }
     
@@ -180,7 +182,7 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         
         this.simulator = null;
         
-        for (int i = 0; i < this.MAX_PLAYERS; i++) {
+        for (int i = 0; i < GUI.MAX_PLAYERS; i++) {
             this.holdemProfiles[i] = new PlayerProfile(HandType.RANDOM, null, null);
             this.omahaProfiles[i] = new PlayerProfile(HandType.RANDOM, null, null);
             this.omahaHiLoProfiles[i] = new PlayerProfile(HandType.RANDOM, null, null);
@@ -228,8 +230,9 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         GUIUtilities.setBorder(this.playersPanel, "Hand Options", TitledBorder.CENTER);
         middlePanel.add(this.playersPanel, BorderLayout.NORTH);
         
-        communityPanel = createCommunityPanel ();
-        middlePanel.add(communityPanel, BorderLayout.CENTER);
+        this.communityPanel = new CommunityPanel();
+        GUIUtilities.setBorder(this.communityPanel, "Community Cards", TitledBorder.CENTER);
+        middlePanel.add(this.communityPanel, BorderLayout.CENTER);
         
         progressPanel = createProgressPanel();
         middlePanel.add(progressPanel, BorderLayout.SOUTH);
@@ -238,46 +241,6 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         
         resultsPanel = createResultsPanel();
         panel.add(resultsPanel, BorderLayout.SOUTH);
-        
-        return panel;
-    }
-        
-    private JPanel createCommunityPanel()
-    {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
-        GUIUtilities.setBorder(panel, "Community Cards", TitledBorder.CENTER);
-        
-        enableFlop = new JCheckBox("Flop:");
-        
-        flopCard1 = new JLabel();
-        flopCard2 = new JLabel();
-        flopCard3 = new JLabel();
-        
-        panel.add(enableFlop);
-        panel.add(flopCard1);
-        panel.add(flopCard2);
-        panel.add(flopCard3);
-    
-        enableTurn = new JCheckBox("Turn:");
-        
-        turnCard = new JLabel();
-        
-        panel.add(enableTurn);
-        panel.add(turnCard);
-
-        enableRiver = new JCheckBox("River:");
-        
-        riverCard = new JLabel();
-        
-        panel.add(enableRiver);
-        panel.add(riverCard);
-        
-        flopCard1.addMouseListener(new CommunityCardsListener(Street.FLOP));
-        flopCard2.addMouseListener(new CommunityCardsListener(Street.FLOP));
-        flopCard3.addMouseListener(new CommunityCardsListener(Street.FLOP));
-        turnCard.addMouseListener(new CommunityCardsListener(Street.TURN));
-        riverCard.addMouseListener(new CommunityCardsListener(Street.RIVER));
         
         return panel;
     }
@@ -375,9 +338,9 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
                 startButton.setEnabled(false);
                 stopButton.setEnabled(true);
                 generalChoicesPanel.setPlayerCountEnabled(false);
-                enableFlop.setEnabled(false);
-                enableTurn.setEnabled(false);
-                enableRiver.setEnabled(false);
+                communityPanel.setFlopEnabled(false);
+                communityPanel.setTurnEnabled(false);
+                communityPanel.setRiverEnabled(false);
 
                 mainframe.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -512,13 +475,13 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
                 riverCard = omahaHiLoCommunityCards[4];
             }
             
-            if (enableFlop.isSelected() && flop[0] != null) {
+            if (communityPanel.isFlopSelected() && flop[0] != null) {
                 simulator.setFlop(flop);
             }
-            if (enableTurn.isSelected() && turnCard != null) {
+            if (communityPanel.isTurnSelected() && turnCard != null) {
                 simulator.setTurn(turnCard);
             }
-            if (enableRiver.isSelected() && riverCard != null) {
+            if (communityPanel.isRiverSelected() && riverCard != null) {
                 simulator.setRiver(riverCard);
             }
         }
@@ -533,123 +496,112 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         }
     }
     
-    private class CommunityCardsListener extends MouseAdapter
+    private Card[] getSelectedCommunityCards(PokerType selectedPokerType, Street street)
     {
-        private Street street;
-        
-        public CommunityCardsListener(Street street)
-        {
-            this.street = street;
+        Card[] selectedCommunityCards = null;
+
+        int nrCards = (street == Street.FLOP) ? 3 : 1;
+        int position = (street == Street.FLOP ) ? 0 : (street == Street.TURN ? 3 : 4);
+        if (selectedPokerType == PokerType.TEXAS_HOLDEM) {
+            for (int i = position; i < position + nrCards; i++) {
+                if (this.holdemCommunityCards[i] == null) {
+                    return null;
+                }
+            }
+
+            selectedCommunityCards = new Card[nrCards];
+            System.arraycopy(this.holdemCommunityCards, position, selectedCommunityCards, 0, nrCards);
+        } else if (selectedPokerType == PokerType.OMAHA) {
+            for (int i = position; i < position + nrCards; i++) {
+                if (this.omahaCommunityCards[i] == null) {
+                    return null;
+                }
+            }
+
+            selectedCommunityCards = new Card[nrCards];
+            System.arraycopy(this.omahaCommunityCards, position, selectedCommunityCards, 0, nrCards);
+        } else if (selectedPokerType == PokerType.OMAHA_HILO) {
+            for (int i = position; i < position + nrCards; i++) {
+                if (this.omahaHiLoCommunityCards[i] == null) {
+                    return null;
+                }
+            }
+
+            selectedCommunityCards = new Card[nrCards];
+            System.arraycopy(this.omahaHiLoCommunityCards, position, selectedCommunityCards, 0, nrCards);
         }
-        
-        private Card[] getSelectedCommunityCards(PokerType selectedPokerType)
-        {
-            Card[] selectedCommunityCards = null;
 
-            int nrCards =(street == Street.FLOP) ? 3 : 1;
-            int position =(street == Street.FLOP ) ? 0 :(street == Street.TURN ? 3 : 4);
-            if (selectedPokerType == PokerType.TEXAS_HOLDEM) {
-                for (int i = position; i < position + nrCards; i++) {
-                    if (holdemCommunityCards[i] == null) {
-                        return null;
-                    }
-                }
-
-                selectedCommunityCards = new Card[nrCards];
-                System.arraycopy(holdemCommunityCards, position, selectedCommunityCards, 0, nrCards);
-            } else if (selectedPokerType == PokerType.OMAHA) {
-                for (int i = position; i < position + nrCards; i++) {
-                    if (omahaCommunityCards[i] == null) {
-                        return null;
-                    }
-                }
-                
-                selectedCommunityCards = new Card[nrCards];
-                System.arraycopy(omahaCommunityCards, position, selectedCommunityCards, 0, nrCards);
-            } else if (selectedPokerType == PokerType.OMAHA_HILO) {
-                for (int i = position; i < position + nrCards; i++) {
-                    if (omahaHiLoCommunityCards[i] == null) {
-                        return null;
-                    }
-                }
-                
-                selectedCommunityCards = new Card[nrCards];
-                System.arraycopy(omahaHiLoCommunityCards, position, selectedCommunityCards, 0, nrCards);
+        return selectedCommunityCards;
+    }
+    
+    private void updateCommunityCards(PokerType selectedPokerType, Street street, Card[] newCards)
+    {
+        if (selectedPokerType == PokerType.TEXAS_HOLDEM) {
+            if (street == Street.FLOP) {
+                this.holdemCommunityCards[0] = newCards[0];
+                this.holdemCommunityCards[1] = newCards[1];
+                this.holdemCommunityCards[2] = newCards[2];
+            } else if (street == Street.TURN) {
+                this.holdemCommunityCards[3] = newCards[0];
+            } else if (street == Street.RIVER) {
+                this.holdemCommunityCards[4] = newCards[0];
             }
-            
-            return selectedCommunityCards;
-        }
-        
-        @Override
-        public void mousePressed(MouseEvent e)
-        {
-            if (! enableFlop.isEnabled()) {
-                return;
+        } else if (selectedPokerType == PokerType.OMAHA) {
+            if (street == Street.FLOP) {
+                this.omahaCommunityCards[0] = newCards[0];
+                this.omahaCommunityCards[1] = newCards[1];
+                this.omahaCommunityCards[2] = newCards[2];
+            } else if (street == Street.TURN) {
+                this.omahaCommunityCards[3] = newCards[0];
+            } else if (street == Street.RIVER) {
+                this.omahaCommunityCards[4] = newCards[0];
             }
-            
-            if ((street == Street.FLOP && ! enableFlop.isSelected()) ||
-               (street == Street.TURN && ! enableTurn.isSelected()) ||
-               (street == Street.RIVER && ! enableRiver.isSelected())) {
-                return;
-            }
-
-            PokerType selectedPokerType = generalChoicesPanel.getSelectedVariation();
-            
-            ArrayList<Card> usedCards = getUsedCards(selectedPokerType);
-            
-            Card[] selectedCommunityCards = getSelectedCommunityCards(selectedPokerType);
-            
-            int nrCards =(street == Street.FLOP) ? 3 : 1;
-
-            CardsDialog cd = new CardsDialog(mainframe, nrCards, selectedCommunityCards, usedCards);
-            cd.setLocationRelativeTo(mainframe);
-            cd.setVisible(true);
-                
-            Card[] newCards = cd.getCards();
-                
-            if (newCards != null) {
-                updateCommunityCards(selectedPokerType, newCards);
-            
-                setCommunityCardsContent();
-            }
-        }
-        
-        private void updateCommunityCards(PokerType selectedPokerType, Card[] newCards)
-        {
-            if (selectedPokerType == PokerType.TEXAS_HOLDEM) {
-                if (street == Street.FLOP) {
-                    holdemCommunityCards[0] = newCards[0];
-                    holdemCommunityCards[1] = newCards[1];
-                    holdemCommunityCards[2] = newCards[2];
-                } else if (street == Street.TURN) {
-                    holdemCommunityCards[3] = newCards[0];
-                } else if (street == Street.RIVER) {
-                    holdemCommunityCards[4] = newCards[0];
-                }
-            } else if (selectedPokerType == PokerType.OMAHA) {
-                if (street == Street.FLOP) {
-                    omahaCommunityCards[0] = newCards[0];
-                    omahaCommunityCards[1] = newCards[1];
-                    omahaCommunityCards[2] = newCards[2];
-                } else if (street == Street.TURN) {
-                    omahaCommunityCards[3] = newCards[0];
-                } else if (street == Street.RIVER) {
-                    omahaCommunityCards[4] = newCards[0];
-                }
-            } else if (selectedPokerType == PokerType.OMAHA_HILO) {
-                if (street == Street.FLOP) {
-                    omahaHiLoCommunityCards[0] = newCards[0];
-                    omahaHiLoCommunityCards[1] = newCards[1];
-                    omahaHiLoCommunityCards[2] = newCards[2];
-                } else if (street == Street.TURN) {
-                    omahaHiLoCommunityCards[3] = newCards[0];
-                } else if (street == Street.RIVER) {
-                    omahaHiLoCommunityCards[4] = newCards[0];
-                }
+        } else if (selectedPokerType == PokerType.OMAHA_HILO) {
+            if (street == Street.FLOP) {
+                this.omahaHiLoCommunityCards[0] = newCards[0];
+                this.omahaHiLoCommunityCards[1] = newCards[1];
+                this.omahaHiLoCommunityCards[2] = newCards[2];
+            } else if (street == Street.TURN) {
+                this.omahaHiLoCommunityCards[3] = newCards[0];
+            } else if (street == Street.RIVER) {
+                this.omahaHiLoCommunityCards[4] = newCards[0];
             }
         }
     }
+    
+    private void communityCardMouseClickAction(Street street)
+    {
+        if (! communityPanel.isFlopEnabled()) {
+            return;
+        }
 
+        if ((street == Street.FLOP && ! communityPanel.isFlopSelected()) ||
+           (street == Street.TURN && ! communityPanel.isTurnSelected()) ||
+           (street == Street.RIVER && ! communityPanel.isRiverSelected())) {
+            return;
+        }
+
+        PokerType selectedPokerType = generalChoicesPanel.getSelectedVariation();
+
+        ArrayList<Card> usedCards = getUsedCards(selectedPokerType);
+
+        Card[] selectedCommunityCards = getSelectedCommunityCards(selectedPokerType, street);
+
+        int nrCards =(street == Street.FLOP) ? 3 : 1;
+
+        CardsDialog cd = new CardsDialog(mainframe, nrCards, selectedCommunityCards, usedCards);
+        cd.setLocationRelativeTo(mainframe);
+        cd.setVisible(true);
+
+        Card[] newCards = cd.getCards();
+
+        if (newCards != null) {
+            updateCommunityCards(selectedPokerType, street, newCards);
+
+            setCommunityCardsContent();
+        }
+    }
+    
     private void setChoicesTableContent()
     {
         PokerType gameType = this.generalChoicesPanel.getSelectedVariation();
@@ -709,41 +661,41 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         }
         
         if (currentCommunityCards[0] != null) {
-            enableFlop.setSelected(true);
-            flopCard1.setIcon(
+            communityPanel.setFlopEnabled(true);
+            communityPanel.setIconFlop1(
                 new ImageIcon(getClass().getResource("images/cards/" + currentCommunityCards[0].toString() + ".gif"))
             );
-            flopCard2.setIcon(
+            communityPanel.setIconFlop2(
                 new ImageIcon(getClass().getResource("images/cards/" + currentCommunityCards[1].toString() + ".gif"))
             );
-            flopCard3.setIcon(
+            communityPanel.setIconFlop3(
                 new ImageIcon(getClass().getResource("images/cards/" + currentCommunityCards[2].toString() + ".gif"))
             );
         } else {
-            enableFlop.setSelected(false);
-            flopCard1.setIcon(new ImageIcon(getClass().getResource(blankCardPath)));
-            flopCard2.setIcon(new ImageIcon(getClass().getResource(blankCardPath)));
-            flopCard3.setIcon(new ImageIcon(getClass().getResource(blankCardPath)));
+            communityPanel.setFlopSelected(false);
+            communityPanel.setIconFlop1(new ImageIcon(getClass().getResource(blankCardPath)));
+            communityPanel.setIconFlop2(new ImageIcon(getClass().getResource(blankCardPath)));
+            communityPanel.setIconFlop3(new ImageIcon(getClass().getResource(blankCardPath)));
         }
         
         if (currentCommunityCards[3] != null) {
-            enableTurn.setSelected(true);
-            turnCard.setIcon(
+            communityPanel.setTurnEnabled(true);
+            communityPanel.setIconTurn(
                 new ImageIcon(getClass().getResource("images/cards/" + currentCommunityCards[3].toString() + ".gif"))
             );
         } else {
-            enableTurn.setSelected(false);
-            turnCard.setIcon(new ImageIcon(getClass().getResource(blankCardPath)));
+            communityPanel.setTurnSelected(false);
+            communityPanel.setIconTurn(new ImageIcon(getClass().getResource(blankCardPath)));
         }
         
         if (currentCommunityCards[4] != null) {
-            enableRiver.setSelected(true);
-            riverCard.setIcon(
+            communityPanel.setRiverEnabled(true);
+            communityPanel.setIconRiver(
                 new ImageIcon(getClass().getResource("images/cards/" + currentCommunityCards[4].toString() + ".gif"))
             );
         } else {
-            enableRiver.setSelected(false);
-            riverCard.setIcon(new ImageIcon(getClass().getResource(blankCardPath)));
+            communityPanel.setRiverSelected(false);
+            communityPanel.setIconRiver(new ImageIcon(getClass().getResource(blankCardPath)));
         }
     }
     
@@ -790,9 +742,9 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
         this.generalChoicesPanel.setPlayerCountEnabled(true);
-        enableFlop.setEnabled(true);
-        enableTurn.setEnabled(true);
-        enableRiver.setEnabled(true);
+        communityPanel.setFlopEnabled(true);
+        communityPanel.setTurnEnabled(true);
+        communityPanel.setRiverEnabled(true);
         
         mainframe.setCursor(Cursor.getDefaultCursor());
 
@@ -817,11 +769,8 @@ public final class GUI implements SimulationNotifiable, ListenerInterface
         @Override
         public void actionPerformed(ActionEvent e)
         {
-            ResultChartDialog rcd = new ResultChartDialog(
-                mainframe,
-                "Simulation Results Graph",
-                simulator.getResult()
-            );
+            String title = "Simulation Results Graph";
+            ResultChartDialog rcd = new ResultChartDialog(mainframe, title, simulator.getResult());
             rcd.setLocationRelativeTo(mainframe);
             rcd.setVisible(true);
         }
