@@ -4,9 +4,11 @@ import org.javafling.pokerenlighter.event.AbstractEvent;
 
 public class PlayerCountChangeEvent extends AbstractEvent
 {
+    public static final String NAME = "gui.generalchoices.playercount";
+    
     @Override
     public String getName()
     {
-        return "gui.generalchoices.playercount";
+        return PlayerCountChangeEvent.NAME;
     }
 }

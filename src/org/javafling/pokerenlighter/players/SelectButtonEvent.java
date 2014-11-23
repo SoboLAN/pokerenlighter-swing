@@ -4,9 +4,11 @@ import org.javafling.pokerenlighter.event.AbstractEvent;
 
 public class SelectButtonEvent extends AbstractEvent
 {
+    public static final String NAME = "gui.players.selectbutton";
+    
     @Override
     public String getName()
     {
-        return "gui.players.selectbutton";
+        return SelectButtonEvent.NAME;
     }
 }
